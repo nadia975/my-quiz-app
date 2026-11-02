@@ -1,0 +1,999 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>중학교 과학 IV. 물질의 상태 변화 퀴즈</title>
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Google Fonts: Noto Sans KR -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          fontFamily: {
+            sans: ['Noto Sans KR', 'sans-serif'],
+          },
+          colors: {
+            pastel: {
+              blue: '#E0F2FE',
+              blueDark: '#0284C7',
+              pink: '#FCE7F3',
+              pinkDark: '#DB2777',
+              mint: '#E6FFFA',
+              mintDark: '#0D9488',
+              yellow: '#FEF3C7',
+              yellowDark: '#D97706',
+              purple: '#F3E8FF',
+              purpleDark: '#7E22CE',
+            }
+          },
+          keyframes: {
+            shake: {
+              '0%, 100%': { transform: 'translateX(0)' },
+              '20%, 60%': { transform: 'translateX(-6px)' },
+              '40%, 80%': { transform: 'translateX(6px)' },
+            },
+            pop: {
+              '0%': { transform: 'scale(0.95)', opacity: '0' },
+              '100%': { transform: 'scale(1)', opacity: '1' },
+            }
+          },
+          animation: {
+            shake: 'shake 0.4s ease-in-out',
+            pop: 'pop 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards',
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: linear-gradient(135deg, #E0F2FE 0%, #FCE7F3 50%, #E6FFFA 100%);
+      min-height: 100vh;
+    }
+    .custom-shadow {
+      box-shadow: 0 10px 30px -5px rgba(0, 0, 0, 0.08), 0 4px 12px -2px rgba(0, 0, 0, 0.04);
+    }
+  </style>
+</head>
+<body class="text-slate-800 flex flex-col justify-between min-h-screen p-4 sm:p-6 md:p-8">
+
+  <!-- Confetti Canvas for Victory Result -->
+  <canvas id="confetti-canvas" class="fixed inset-0 pointer-events-none z-50"></canvas>
+
+  <!-- HOME CONFIRMATION MODAL -->
+  <div id="home-modal" class="hidden fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl p-6 max-w-sm w-full shadow-2xl text-center space-y-4 animate-pop border border-white">
+      <div class="w-14 h-14 mx-auto rounded-full bg-sky-100 flex items-center justify-center text-2xl">🏠</div>
+      <div>
+        <h3 class="text-lg font-bold text-slate-800">처음 화면으로 돌아갈까요?</h3>
+        <p class="text-xs text-slate-500 mt-1">진행 중인 퀴즈 정보가 초기화됩니다.</p>
+      </div>
+      <div class="flex gap-2 pt-1">
+        <button id="modal-cancel-btn" class="flex-1 py-2.5 rounded-xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs sm:text-sm cursor-pointer transition-all">취소</button>
+        <button id="modal-confirm-btn" class="flex-1 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 text-white font-bold text-xs sm:text-sm shadow-md cursor-pointer transition-all">확인 (이동)</button>
+      </div>
+    </div>
+  </div>
+
+  <div class="max-w-2xl mx-auto w-full my-auto">
+    
+    <!-- HEADER -->
+    <header class="mb-6">
+      <div class="flex items-center justify-between mb-3">
+        <div class="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-white/70 backdrop-blur-md text-sky-700 text-xs sm:text-sm font-semibold border border-white/80 shadow-sm">
+          <span>🔬 중1 과학</span>
+          <span class="w-1.5 h-1.5 rounded-full bg-sky-400"></span>
+          <span>IV. 물질의 상태 변화</span>
+        </div>
+        <!-- ALWAYS VISIBLE HOME BUTTON -->
+        <button id="nav-home-btn" class="px-3 py-1.5 rounded-full bg-white/80 hover:bg-white text-slate-700 hover:text-sky-600 text-xs sm:text-sm font-bold border border-white/90 shadow-sm transition-all cursor-pointer flex items-center gap-1">
+          <span>🏠 처음으로</span>
+        </button>
+      </div>
+      <h1 class="text-center text-2xl sm:text-3xl font-extrabold text-slate-800 tracking-tight">
+        물질의 상태 변화 퀴즈 🧪
+      </h1>
+    </header>
+
+    <!-- MAIN CARD CONTAINER -->
+    <main class="bg-white/90 backdrop-blur-md rounded-3xl p-5 sm:p-8 custom-shadow border border-white/60 relative overflow-hidden transition-all duration-300">
+
+      <!-- 1. START SCREEN -->
+      <section id="start-screen" class="text-center py-4 space-y-6 animate-pop">
+        <div class="w-20 h-20 sm:w-24 sm:h-24 mx-auto rounded-3xl bg-gradient-to-tr from-sky-200 via-pink-200 to-mint-200 flex items-center justify-center text-4xl shadow-inner border border-white">
+          🧊
+        </div>
+        <div>
+          <h2 class="text-xl font-bold text-slate-800 mb-2">교과서 핵심 개념 10문제 완성!</h2>
+          <p class="text-slate-600 text-sm sm:text-base max-w-md mx-auto leading-relaxed">
+            퀴즈를 풀기 전 개념 정리를 먼저 학습하거나 바로 퀴즈에 도전해보세요.
+          </p>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3 max-w-sm mx-auto text-left text-xs sm:text-sm font-medium text-slate-700">
+          <div class="bg-sky-50/80 p-3 rounded-2xl border border-sky-100 flex items-center gap-2">
+            <span class="text-sky-500 font-bold">✓</span> 10문제 (100점 만점)
+          </div>
+          <div class="bg-pink-50/80 p-3 rounded-2xl border border-pink-100 flex items-center gap-2">
+            <span class="text-pink-500 font-bold">✓</span> 기회 2회 (재도전 가능)
+          </div>
+          <div class="bg-teal-50/80 p-3 rounded-2xl border border-teal-100 flex items-center gap-2">
+            <span class="text-teal-500 font-bold">✓</span> 핵심 개념 정리 탑재
+          </div>
+          <div class="bg-amber-50/80 p-3 rounded-2xl border border-amber-100 flex items-center gap-2">
+            <span class="text-amber-500 font-bold">✓</span> 실시간 해설 & 오답노트
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-3 justify-center pt-2">
+          <button id="study-start-btn" class="px-6 py-3.5 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-base border border-amber-300 transition-all cursor-pointer flex items-center justify-center gap-2">
+            <span>📖 핵심 개념 먼저 공부하기</span>
+          </button>
+          <button id="quiz-start-btn" class="px-8 py-3.5 rounded-2xl bg-gradient-to-r from-sky-500 to-teal-400 hover:from-sky-600 hover:to-teal-500 text-white font-bold text-base shadow-lg hover:shadow-sky-200 transition-all cursor-pointer flex items-center justify-center gap-2">
+            <span>🚀 퀴즈 바로 시작하기</span>
+          </button>
+        </div>
+      </section>
+
+      <!-- 2. STUDY SUMMARY SCREEN (개념 정리 화면) -->
+      <section id="study-screen" class="hidden space-y-6 animate-pop">
+        <div class="border-b border-slate-200 pb-3 flex items-center justify-between">
+          <h2 class="text-lg sm:text-xl font-extrabold text-slate-800 flex items-center gap-2">
+            📚 IV. 물질의 상태 변화 핵심 요점 정리
+          </h2>
+          <span class="text-xs bg-sky-100 text-sky-700 px-2.5 py-1 rounded-full font-bold">시험 완벽 대비</span>
+        </div>
+
+        <div class="space-y-4 max-h-[60vh] overflow-y-auto pr-2 text-xs sm:text-sm">
+          
+          <!-- 카드 1: 물질의 세 가지 상태와 입자의 운동 -->
+          <div class="bg-sky-50/80 p-4 sm:p-5 rounded-2xl border border-sky-200/80 space-y-2">
+            <h3 class="font-bold text-sky-800 text-base flex items-center gap-1.5">
+              <span>1️⃣</span> 물질의 세 가지 상태 & 입자의 운동
+            </h3>
+            <ul class="list-disc list-inside text-slate-700 space-y-1 leading-relaxed">
+              <li><strong>입자의 운동:</strong> 모든 물질을 이루는 입자는 스스로 끊임없이 운동함.</li>
+              <li><strong>확산:</strong> 입자가 스스로 운동하여 주변으로 퍼져 나가는 현상 (예: 향수 냄새, 홍차 우러남).</li>
+              <li><strong>증발:</strong> 액체 <em>표면</em>에서 입자가 기체로 변해 날아가는 현상 (예: 빨래 마름, 손 소독제 마름).</li>
+              <li><strong>상태별 특징:</strong>
+                <ul class="pl-4 mt-1 space-y-0.5 text-slate-600">
+                  <li>• <strong>고체:</strong> 모양과 부피 일정, 입자 배열 매우 규칙적, 진동만 함.</li>
+                  <li>• <strong>액체:</strong> 모양은 변하나 부피 일정, 흐르는 성질, 불규칙 배열.</li>
+                  <li>• <strong>기체:</strong> 모양과 부피 모두 쉽게 변함, 입자 거리 매우 멀고 활발함.</li>
+                </ul>
+              </li>
+            </ul>
+          </div>
+
+          <!-- 카드 2: 상태 변화와 입자 배열/질량/부피 -->
+          <div class="bg-pink-50/80 p-4 sm:p-5 rounded-2xl border border-pink-200/80 space-y-2">
+            <h3 class="font-bold text-pink-800 text-base flex items-center gap-1.5">
+              <span>2️⃣</span> 상태 변화와 입자 배열 (질량과 부피)
+            </h3>
+            <ul class="list-disc list-inside text-slate-700 space-y-1 leading-relaxed">
+              <li><strong>상태 변화 종류:</strong>
+                <ul class="pl-4 mt-1 space-y-0.5 text-slate-600">
+                  <li>• <strong>융해:</strong> 고체 → 액체 (버터 녹음) / <strong>응고:</strong> 액체 → 고체 (촛농 굳음)</li>
+                  <li>• <strong>기화:</strong> 액체 → 기체 (물 끓음) / <strong>액화:</strong> 기체 → 액체 (컵 표면 물방울)</li>
+                  <li>• <strong>승화:</strong> 고체 ↔ 기체 직접 변화 (드라이아이스 크기 줄어듦, 서리)</li>
+                </ul>
+              </li>
+              <li><strong>질량과 성질:</strong> 상태가 변해도 <em>입자의 종류와 개수는 변하지 않으므로</em> 질량과 성질은 그대로 유지됨.</li>
+              <li><strong>부피 변화:</strong> 일반적으로 [기체 &gt; 액체 &gt; 고체] 순으로 부피가 큼. (단, <strong>물은 얼 때 육각형 구조를 형성하여 부피가 증가함!</strong>)</li>
+            </ul>
+          </div>
+
+          <!-- 카드 3: 열에너지 흡수·방출과 실생활 활용 -->
+          <div class="bg-teal-50/80 p-4 sm:p-5 rounded-2xl border border-teal-200/80 space-y-2">
+            <h3 class="font-bold text-teal-800 text-base flex items-center gap-1.5">
+              <span>3️⃣</span> 열에너지 출입과 실생활 활용
+            </h3>
+            <ul class="list-disc list-inside text-slate-700 space-y-1 leading-relaxed">
+              <li><strong>열에너지 흡수 (주위 온도 낮아짐):</strong> 융해, 기화, 승화(고→기)
+                <p class="pl-4 text-slate-600 mt-0.5">• 가열 곡선의 평탄면: 가해준 열에너지가 <em>상태 변화에 사용</em>되므로 온도가 유지됨.</p>
+                <p class="pl-4 text-slate-600">• 실생활 예: 젖은 빨래/땀이 마르면 시원함(기화), 냉장고 증발기에서 냉매 기화, 드라이아이스 흡열.</p>
+              </li>
+              <li><strong>열에너지 방출 (주위 온도 높아짐):</strong> 응고, 액화, 승화(기→고)
+                <p class="pl-4 text-slate-600 mt-0.5">• 냉각 곡선의 평탄면: 방출하는 열에너지 때문에 온도가 일정하게 유지됨.</p>
+                <p class="pl-4 text-slate-600">• 실생활 예: 이글루/과수원에 물 뿌리기(물이 얼며 열 방출), 파라핀 치료기 응고열.</p>
+              </li>
+              <li><strong>컴퓨터 CPU 히트 파이프:</strong> 파이프 내부 냉매가 CPU 열을 받아 <em>기화</em>하여 이동한 뒤, 식으면서 <em>액화</em>되는 과정을 끊임없이 반복하여 열을 식힘.</li>
+            </ul>
+          </div>
+
+        </div>
+
+        <div class="pt-2 text-center">
+          <button id="finish-study-btn" class="w-full py-4 rounded-2xl bg-gradient-to-r from-sky-500 to-teal-400 hover:from-sky-600 hover:to-teal-500 text-white font-bold text-lg shadow-lg hover:shadow-sky-200 transition-all cursor-pointer">
+            🚀 10문제 퀴즈 도전하기
+          </button>
+        </div>
+      </section>
+
+      <!-- 3. QUIZ SCREEN -->
+      <section id="quiz-screen" class="hidden space-y-5">
+        
+        <!-- PROGRESS BAR & TOP INFO -->
+        <div class="space-y-2">
+          <div class="flex justify-between items-center text-xs sm:text-sm font-semibold text-slate-500">
+            <span id="question-count-badge" class="px-3 py-1 rounded-full bg-slate-100 text-slate-700 font-bold">
+              문제 1 / 10
+            </span>
+            <!-- HEART CHANCES -->
+            <div id="heart-container" class="flex items-center gap-1 text-base">
+              <span class="text-xs font-bold text-slate-400 mr-1">기회:</span>
+              <span id="heart-1">💚</span>
+              <span id="heart-2">💚</span>
+            </div>
+            <span id="current-score-badge" class="text-sky-600 font-bold">
+              점수: 0점
+            </span>
+          </div>
+          <div class="w-full bg-slate-100 rounded-full h-3 overflow-hidden p-0.5 border border-slate-200/60">
+            <div id="progress-bar-fill" class="bg-gradient-to-r from-sky-400 via-teal-400 to-pink-400 h-full rounded-full transition-all duration-400 w-1/10"></div>
+          </div>
+        </div>
+
+        <!-- RETRY / FEEDBACK ALERT BANNER -->
+        <div id="retry-alert-banner" class="hidden p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs sm:text-sm font-bold flex items-center justify-between animate-pop">
+          <span id="retry-alert-text">💡 틀렸습니다! 다시 한번 생각해보세요 (남은 기회: 1회)</span>
+          <span class="text-amber-500 font-extrabold">↺ 재도전</span>
+        </div>
+
+        <!-- QUESTION BOX -->
+        <div class="space-y-2 pt-1">
+          <span id="question-category" class="inline-block px-3 py-1 text-xs font-bold rounded-lg bg-sky-100 text-sky-700">
+            [단원 개념]
+          </span>
+          <h3 id="question-text" class="text-base sm:text-lg font-bold text-slate-800 leading-snug min-h-[3rem]">
+            질문 내용이 여기에 표시됩니다.
+          </h3>
+        </div>
+
+        <!-- OPTIONS BUTTONS -->
+        <div id="options-container" class="grid grid-cols-1 gap-2.5 pt-1">
+          <!-- Options dynamically rendered in JS -->
+        </div>
+
+        <!-- EXPLANATION BOX (Hidden until finished question) -->
+        <div id="explanation-box" class="hidden animate-pop p-4 rounded-2xl bg-sky-50 border border-sky-200/80 text-slate-800 space-y-2.5">
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <span id="explanation-icon" class="text-lg">💡</span>
+              <span id="explanation-title" class="font-bold text-sm sm:text-base">정답 해설</span>
+            </div>
+            <span id="score-earned-badge" class="text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-700">+10점 획득</span>
+          </div>
+          <p id="explanation-text" class="text-xs sm:text-sm text-slate-700 leading-relaxed">
+            해설 내용이 여기에 들어갑니다.
+          </p>
+          <div class="pt-1 flex justify-end">
+            <button id="next-btn" class="px-6 py-2.5 rounded-xl bg-sky-500 hover:bg-sky-600 active:bg-sky-700 text-white font-bold text-sm shadow-md transition-all flex items-center gap-1.5 cursor-pointer">
+              <span>다음 문제</span>
+              <span>👉</span>
+            </button>
+          </div>
+        </div>
+
+      </section>
+
+      <!-- 4. RESULT SCREEN -->
+      <section id="result-screen" class="hidden text-center py-4 space-y-5 animate-pop">
+        
+        <div class="relative w-28 h-28 mx-auto flex items-center justify-center">
+          <div class="absolute inset-0 rounded-full bg-gradient-to-tr from-sky-300 via-pink-300 to-amber-300 animate-spin opacity-40 blur-md"></div>
+          <div class="relative w-24 h-24 rounded-full bg-white shadow-inner border-4 border-sky-200 flex flex-col items-center justify-center">
+            <span id="result-score" class="text-3xl font-extrabold text-sky-600">100</span>
+            <span class="text-xs font-bold text-slate-400">/ 100점</span>
+          </div>
+        </div>
+
+        <div>
+          <h2 id="result-badge-text" class="text-xl sm:text-2xl font-black text-slate-800 mb-1">
+            🎉 완벽해요! 상태 변화 마스터!
+          </h2>
+          <p id="result-message" class="text-slate-600 text-xs sm:text-sm max-w-md mx-auto leading-relaxed font-medium">
+            축하합니다! 물질의 상태 변화 단원의 주요 개념을 완전히 이해하셨군요!
+          </p>
+        </div>
+
+        <!-- STATS SUMMARY -->
+        <div class="bg-slate-50/80 rounded-2xl p-3 border border-slate-200/80 max-w-md mx-auto grid grid-cols-2 gap-2 text-center">
+          <div class="p-1.5">
+            <p class="text-xs text-slate-400 font-semibold mb-0.5">최종 획득 점수</p>
+            <p id="result-score-text" class="text-lg font-bold text-emerald-600">100점</p>
+          </div>
+          <div class="p-1.5 border-l border-slate-200">
+            <p class="text-xs text-slate-400 font-semibold mb-0.5">학습 달성도</p>
+            <p id="result-percentage" class="text-lg font-bold text-sky-600">100%</p>
+          </div>
+        </div>
+
+        <!-- QUESTION SUMMARY REVIEW LIST -->
+        <div class="max-w-md mx-auto text-left space-y-2">
+          <h4 class="text-xs font-bold text-slate-500 uppercase tracking-wider px-1 flex items-center justify-between">
+            <span>📋 문제별 오답노트 및 결과</span>
+            <span class="text-[10px] text-slate-400">클릭 시 상세 해설</span>
+          </h4>
+          <div id="review-list" class="space-y-2 max-h-44 overflow-y-auto pr-1 text-xs">
+            <!-- Rendered by JS -->
+          </div>
+        </div>
+
+        <div class="flex flex-col sm:flex-row gap-2.5 justify-center pt-2">
+          <button id="view-concept-btn" class="px-6 py-3 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-sm border border-slate-300 transition-all cursor-pointer">
+            📖 개념 다시 보기
+          </button>
+          <button id="result-home-btn" class="px-6 py-3 rounded-2xl bg-amber-100 hover:bg-amber-200 text-amber-900 font-bold text-sm border border-amber-300 transition-all cursor-pointer flex items-center justify-center gap-1">
+            🏠 처음으로 (개념 학습)
+          </button>
+          <button id="restart-btn" class="px-8 py-3 rounded-2xl bg-gradient-to-r from-sky-500 to-teal-400 hover:from-sky-600 hover:to-teal-500 text-white font-bold text-sm shadow-lg transition-all cursor-pointer">
+            🔄 퀴즈 다시 풀기
+          </button>
+        </div>
+
+      </section>
+
+    </main>
+
+    <!-- FOOTER -->
+    <footer class="text-center mt-6 text-xs text-slate-500 font-medium">
+      중학교 1학년 과학 Ⅳ. 물질의 상태 변화 맞춤 학습 웹앱
+    </footer>
+
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    // --- 1. QUIZ DATA (10 Textbook-based Questions) ---
+    const quizData = [
+      {
+        id: 1,
+        category: "01 확산과 증발",
+        question: "Q1. 향수 냄새가 방 안으로 퍼지는 '확산'과 젖은 빨래가 마르는 '증발' 현상의 공통 원인은 무엇일까요?",
+        options: [
+          "입자가 스스로 끊임없이 운동하기 때문에",
+          "중력이 입자를 아래로 당기기 때문에",
+          "바람이 입자를 직접 밖으로 밀어내기 때문에",
+          "입자의 크기가 점점 작아지기 때문에"
+        ],
+        answer: 0,
+        explanation: "확산과 증발은 모두 물질을 이루는 입자가 스스로 끊임없이 운동하여 퍼져 나가거나 날아가는 현상입니다."
+      },
+      {
+        id: 2,
+        category: "02 물질의 상태",
+        question: "Q2. 입자 사이의 거리가 매우 멀고 입자의 배열이 가장 불규칙하며, 모양과 부피가 모두 쉽게 변하는 상태는?",
+        options: [
+          "고체 상태",
+          "액체 상태",
+          "기체 상태",
+          "플라스마 상태"
+        ],
+        answer: 2,
+        explanation: "기체 상태는 입자 사이의 거리가 매우 멀어 자유롭게 운동하므로 담는 용기에 따라 모양과 부피가 일정하지 않습니다."
+      },
+      {
+        id: 3,
+        category: "03 상태 변화 종류",
+        question: "Q3. 아이스크림 포장용 드라이아이스의 크기가 작아지거나, 겨울철 서리가 내리는 것처럼 액체를 거치지 않고 직접 일어나는 상태 변화는?",
+        options: [
+          "승화 (Sublimation)",
+          "융해 (Melting)",
+          "기화 (Vaporization)",
+          "액화 (Liquefaction)"
+        ],
+        answer: 0,
+        explanation: "고체가 직접 기체로 변하거나(드라이아이스), 기체가 직접 고체로 변하는(서리) 현상은 모두 '승화'입니다."
+      },
+      {
+        id: 4,
+        category: "04 질량과 부피 변화",
+        question: "Q4. 물질의 상태가 변할 때 '변하는 것'과 '변하지 않는 것'을 올바르게 짝지은 것은 무엇일까요?",
+        options: [
+          "변하는 것: 입자 배열 / 변하지 않는 것: 전체 질량 및 성질",
+          "변하는 것: 입자의 개수 / 변하지 않는 것: 부피",
+          "변하는 것: 입자의 종류 / 변하지 않는 것: 입자 사이의 거리",
+          "변하는 것: 전체 질량 / 변하지 않는 것: 입자 운동"
+        ],
+        answer: 0,
+        explanation: "상태가 변해도 입자의 종류와 개수는 변하지 않으므로 질량과 성질은 일정하지만, 입자 배열과 거리가 달라져 부피는 변합니다."
+      },
+      {
+        id: 5,
+        category: "05 물의 특이한 상태 변화",
+        question: "Q5. 일반적인 물질과 달리, 물이 얼어 얼음(고체)이 될 때 부피가 오히려 증가하는 과학적 이유는?",
+        options: [
+          "물 입자들이 빈 공간이 많은 육각형 구조로 배열되기 때문",
+          "얼으면서 물 입자의 전체 개수가 늘어나기 때문",
+          "공기 중의 기체가 얼음 속으로 흡수되기 때문",
+          "입자 하나의 크기가 팽창하기 때문"
+        ],
+        answer: 0,
+        explanation: "물은 얼면서 입자들이 빈 공간이 많은 규칙적인 육각형 모양으로 배열되므로 부피가 늘어납니다."
+      },
+      {
+        id: 6,
+        category: "06 열에너지 흡수",
+        question: "Q6. 다음 중 주위로부터 열에너지를 '흡수'하는 상태 변화 조합으로만 올바르게 짝지어진 것은?",
+        options: [
+          "융해, 기화, 승화(고체 → 기체)",
+          "응고, 액화, 승화(기체 → 고체)",
+          "융해, 응고, 기화",
+          "액화, 기화, 승화(고체 → 기체)"
+        ],
+        answer: 0,
+        explanation: "입자 운동이 활발해지는 융해(고→액), 기화(액→기), 승화(고→기)는 모두 주위의 열에너지를 흡수합니다."
+      },
+      {
+        id: 7,
+        category: "07 가열 곡선 원리",
+        question: "Q7. 물을 계속 가열해도 끓는 동안(기화) 온도가 높아지지 않고 일정하게 유지되는 이유는 무엇일까요?",
+        options: [
+          "가해준 열에너지가 입자 간 거리를 멀어지게 하는 상태 변화에 사용되기 때문",
+          "열에너지가 공기 중으로 모두 소멸하기 때문",
+          "입자의 운동이 완전히 멈추기 때문",
+          "물 입자가 다른 물질 입자로 변하기 때문"
+        ],
+        answer: 0,
+        explanation: "상태 변화 동안 공급된 열에너지는 온도를 높이는 대신 입자 배열을 변화시키는 데 모두 쓰입니다."
+      },
+      {
+        id: 8,
+        category: "08 열에너지 방출 예시",
+        question: "Q8. 추운 겨울 이글루 안이나 과수원 나무에 물을 뿌려 냉해를 막는 과학적 원리는 무엇일까요?",
+        options: [
+          "물이 얼어 얼음이 될 때(응고) 주변으로 열에너지를 방출하기 때문",
+          "물이 수증기로 기화하며 열에너지를 흡수하기 때문",
+          "얼음이 녹으며 차가운 공기를 차단하기 때문",
+          "물이 승화하면서 영양분을 공급하기 때문"
+        ],
+        answer: 0,
+        explanation: "물이 얼음으로 응고할 때 주위로 열에너지를 방출하므로 주변 온도가 높아져 과일이나 내부를 따뜻하게 보호합니다."
+      },
+      {
+        id: 9,
+        category: "09 냉장고의 원리",
+        question: "Q9. 전기 냉장고 내부를 시원하게 유지하는 냉매의 상태 변화 원리로 가장 적절한 것은 무엇일까요?",
+        options: [
+          "증발기에서 액체 냉매가 기화하면서 열에너지를 흡수함",
+          "응축기에서 기체 냉매가 액화하면서 열에너지를 흡수함",
+          "냉매가 응고하면서 지속적으로 냉기를 방출함",
+          "고체 냉매가 직접 기체로 승화하면서 온도를 낮춤"
+        ],
+        answer: 0,
+        explanation: "냉장고 내부 증발기에서 액체 냉매가 기화하며 냉장고 안의 열에너지를 흡수하여 내부 온도를 낮춥니다."
+      },
+      {
+        id: 10,
+        category: "10 히트 파이프 원리",
+        question: "Q10. 컴퓨터 CPU의 열을 효과적으로 식혀주는 '히트 파이프' 내부 냉매의 작동 원리는 무엇일까요?",
+        options: [
+          "CPU 열로 냉매가 기화한 후, 식으면서 액화되는 과정을 반복함",
+          "냉매가 지속적으로 얼면서(응고) 차가운 온도를 유지함",
+          "고체 냉매가 기체로 승화된 뒤 파이프 밖으로 배출됨",
+          "액체 냉매가 움직이지 않고 열만 흡수하여 소멸함"
+        ],
+        answer: 0,
+        explanation: "히트 파이프 내부의 냉매는 CPU 접촉면에서 열을 흡수해 기화한 뒤, 쿨러 쪽에서 열을 방출하며 액화되는 순환을 반복합니다."
+      }
+    ];
+
+    // --- 2. WEB AUDIO API SYNTHESIZER ---
+    let audioCtx = null;
+
+    function getAudioContext() {
+      if (!audioCtx) {
+        const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+        if (AudioContextClass) {
+          audioCtx = new AudioContextClass();
+        }
+      }
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
+      return audioCtx;
+    }
+
+    // Audio functions
+    function playCorrectSound() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99];
+
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sine';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+          gain.gain.setValueAtTime(0, now + idx * 0.08);
+          gain.gain.linearRampToValueAtTime(0.2, now + idx * 0.08 + 0.02);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.25);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.08);
+          osc.stop(now + idx * 0.08 + 0.28);
+        });
+      } catch (e) {}
+    }
+
+    function playRetrySound() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const osc = ctx.createOscillator();
+        const gain = ctx.createGain();
+        osc.type = 'triangle';
+        osc.frequency.setValueAtTime(320, now);
+        osc.frequency.exponentialRampToValueAtTime(200, now + 0.15);
+        gain.gain.setValueAtTime(0.2, now);
+        gain.gain.exponentialRampToValueAtTime(0.01, now + 0.18);
+        osc.connect(gain);
+        gain.connect(ctx.destination);
+        osc.start(now);
+        osc.stop(now + 0.2);
+      } catch (e) {}
+    }
+
+    function playFailSound() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const notes = [220, 175];
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'sawtooth';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+          gain.gain.setValueAtTime(0.15, now + idx * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.2);
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.12);
+          osc.stop(now + idx * 0.12 + 0.22);
+        });
+      } catch (e) {}
+    }
+
+    function playFinishFanfare() {
+      try {
+        const ctx = getAudioContext();
+        if (!ctx) return;
+        const now = ctx.currentTime;
+        const notes = [523.25, 659.25, 783.99, 1046.50];
+        notes.forEach((freq, idx) => {
+          const osc = ctx.createOscillator();
+          const gain = ctx.createGain();
+          osc.type = 'triangle';
+          osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+          gain.gain.setValueAtTime(0.25, now + idx * 0.12);
+          gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + (idx === 3 ? 0.6 : 0.2));
+          osc.connect(gain);
+          gain.connect(ctx.destination);
+          osc.start(now + idx * 0.12);
+          osc.stop(now + idx * 0.12 + (idx === 3 ? 0.65 : 0.22));
+        });
+      } catch (e) {}
+    }
+
+    // --- 3. STATE MANAGEMENT ---
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let attemptsLeft = 2;
+    let userAnswers = [];
+    let isQuestionFinished = false;
+
+    // DOM Elements
+    const startScreen = document.getElementById('start-screen');
+    const studyScreen = document.getElementById('study-screen');
+    const quizScreen = document.getElementById('quiz-screen');
+    const resultScreen = document.getElementById('result-screen');
+    const homeModal = document.getElementById('home-modal');
+
+    const navHomeBtn = document.getElementById('nav-home-btn');
+    const resultHomeBtn = document.getElementById('result-home-btn');
+    const modalCancelBtn = document.getElementById('modal-cancel-btn');
+    const modalConfirmBtn = document.getElementById('modal-confirm-btn');
+
+    const studyStartBtn = document.getElementById('study-start-btn');
+    const quizStartBtn = document.getElementById('quiz-start-btn');
+    const finishStudyBtn = document.getElementById('finish-study-btn');
+    const nextBtn = document.getElementById('next-btn');
+    const restartBtn = document.getElementById('restart-btn');
+    const viewConceptBtn = document.getElementById('view-concept-btn');
+
+    const questionCountBadge = document.getElementById('question-count-badge');
+    const currentScoreBadge = document.getElementById('current-score-badge');
+    const progressBarFill = document.getElementById('progress-bar-fill');
+    const heart1 = document.getElementById('heart-1');
+    const heart2 = document.getElementById('heart-2');
+
+    const retryAlertBanner = document.getElementById('retry-alert-banner');
+    const retryAlertText = document.getElementById('retry-alert-text');
+    const questionCategory = document.getElementById('question-category');
+    const questionText = document.getElementById('question-text');
+    const optionsContainer = document.getElementById('options-container');
+
+    const explanationBox = document.getElementById('explanation-box');
+    const explanationIcon = document.getElementById('explanation-icon');
+    const explanationTitle = document.getElementById('explanation-title');
+    const explanationText = document.getElementById('explanation-text');
+    const scoreEarnedBadge = document.getElementById('score-earned-badge');
+
+    const resultScore = document.getElementById('result-score');
+    const resultScoreText = document.getElementById('result-score-text');
+    const resultBadgeText = document.getElementById('result-badge-text');
+    const resultMessage = document.getElementById('result-message');
+    const resultPercentage = document.getElementById('result-percentage');
+    const reviewList = document.getElementById('review-list');
+
+    // --- 4. EVENT LISTENERS ---
+    navHomeBtn.addEventListener('click', handleHomeClick);
+    resultHomeBtn.addEventListener('click', showStudyScreen);
+    modalCancelBtn.addEventListener('click', () => homeModal.classList.add('hidden'));
+    modalConfirmBtn.addEventListener('click', () => {
+      homeModal.classList.add('hidden');
+      resetQuiz();
+    });
+
+    studyStartBtn.addEventListener('click', showStudyScreen);
+    quizStartBtn.addEventListener('click', startQuiz);
+    finishStudyBtn.addEventListener('click', startQuiz);
+    nextBtn.addEventListener('click', nextQuestion);
+    restartBtn.addEventListener('click', resetQuiz);
+    viewConceptBtn.addEventListener('click', showStudyScreen);
+
+    // --- 5. FUNCTIONS ---
+    function handleHomeClick() {
+      // If quiz is active and not finished
+      if (!quizScreen.classList.contains('hidden')) {
+        homeModal.classList.remove('hidden');
+      } else {
+        showStudyScreen();
+      }
+    }
+
+    function showStudyScreen() {
+      getAudioContext();
+      startScreen.classList.add('hidden');
+      resultScreen.classList.add('hidden');
+      quizScreen.classList.add('hidden');
+      studyScreen.classList.remove('hidden');
+    }
+
+    function startQuiz() {
+      getAudioContext();
+      currentQuestionIndex = 0;
+      score = 0;
+      userAnswers = [];
+      
+      startScreen.classList.add('hidden');
+      studyScreen.classList.add('hidden');
+      resultScreen.classList.add('hidden');
+      quizScreen.classList.remove('hidden');
+
+      renderQuestion();
+    }
+
+    function renderQuestion() {
+      attemptsLeft = 2;
+      isQuestionFinished = false;
+      
+      explanationBox.classList.add('hidden');
+      retryAlertBanner.classList.add('hidden');
+
+      const q = quizData[currentQuestionIndex];
+
+      // Update Header Info
+      questionCountBadge.innerText = `문제 ${currentQuestionIndex + 1} / ${quizData.length}`;
+      currentScoreBadge.innerText = `점수: ${score}점`;
+      
+      const progressPercent = ((currentQuestionIndex + 1) / quizData.length) * 100;
+      progressBarFill.style.width = `${progressPercent}%`;
+
+      // Update Hearts
+      updateHearts();
+
+      // Question Text
+      questionCategory.innerText = q.category;
+      questionText.innerText = q.question;
+
+      // Render Option Buttons
+      optionsContainer.innerHTML = '';
+      q.options.forEach((opt, idx) => {
+        const button = document.createElement('button');
+        button.dataset.index = idx;
+        button.className = `w-full text-left p-3.5 sm:p-4 rounded-2xl border-2 border-slate-200/80 bg-slate-50/70 hover:bg-sky-50 hover:border-sky-300 font-medium text-xs sm:text-sm text-slate-800 transition-all duration-200 flex items-center justify-between cursor-pointer group transform active:scale-[0.99]`;
+        button.innerHTML = `
+          <div class="flex items-center gap-3">
+            <span class="w-7 h-7 sm:w-8 sm:h-8 rounded-xl bg-white border border-slate-200 text-slate-600 group-hover:border-sky-400 group-hover:text-sky-600 flex items-center justify-center font-bold text-xs sm:text-sm shadow-sm transition-colors">
+              ${idx + 1}
+            </span>
+            <span>${opt}</span>
+          </div>
+          <span class="status-icon text-base sm:text-lg opacity-0 transition-opacity"></span>
+        `;
+        button.addEventListener('click', () => handleAnswerClick(idx, button));
+        optionsContainer.appendChild(button);
+      });
+    }
+
+    function updateHearts() {
+      if (attemptsLeft === 2) {
+        heart1.innerText = '💚';
+        heart2.innerText = '💚';
+      } else if (attemptsLeft === 1) {
+        heart1.innerText = '💚';
+        heart2.innerText = '💔';
+      } else {
+        heart1.innerText = '💔';
+        heart2.innerText = '💔';
+      }
+    }
+
+    function handleAnswerClick(selectedIndex, selectedBtn) {
+      if (isQuestionFinished) return;
+
+      const q = quizData[currentQuestionIndex];
+      const isCorrect = (selectedIndex === q.answer);
+
+      if (isCorrect) {
+        // --- CORRECT ANSWER ---
+        isQuestionFinished = true;
+        const pointsEarned = (attemptsLeft === 2) ? 10 : 5;
+        score += pointsEarned;
+        currentScoreBadge.innerText = `점수: ${score}점`;
+        playCorrectSound();
+
+        // Highlight Selected Correct Button
+        selectedBtn.className = `w-full text-left p-3.5 sm:p-4 rounded-2xl border-2 border-emerald-400 bg-emerald-100 text-emerald-900 font-bold text-xs sm:text-sm flex items-center justify-between shadow-md`;
+        selectedBtn.querySelector('.status-icon').innerHTML = '✅';
+        selectedBtn.querySelector('.status-icon').classList.remove('opacity-0');
+
+        // Disable all buttons
+        disableAllOptions();
+        retryAlertBanner.classList.add('hidden');
+
+        // Show Explanation
+        scoreEarnedBadge.innerText = `+${pointsEarned}점 획득`;
+        scoreEarnedBadge.className = `text-xs font-extrabold px-2.5 py-0.5 rounded-full ${attemptsLeft === 2 ? 'bg-emerald-100 text-emerald-700' : 'bg-amber-100 text-amber-700'}`;
+        
+        explanationIcon.innerText = '🎉';
+        explanationTitle.innerText = attemptsLeft === 2 ? '한 번에 정답입니다!' : '재도전 성공! 정답입니다!';
+        explanationTitle.className = 'font-bold text-sm sm:text-base text-emerald-700';
+        explanationText.innerText = q.explanation;
+        explanationBox.className = 'p-4 rounded-2xl bg-emerald-50 border border-emerald-200 text-slate-800 space-y-2.5 animate-pop';
+        explanationBox.classList.remove('hidden');
+
+        // Record Log
+        userAnswers.push({
+          questionId: q.id,
+          category: q.category,
+          attemptsUsed: 3 - attemptsLeft,
+          pointsEarned: pointsEarned,
+          isCorrect: true
+        });
+
+      } else {
+        // --- INCORRECT ANSWER ---
+        attemptsLeft--;
+        updateHearts();
+
+        if (attemptsLeft === 1) {
+          // 1st Attempt Wrong -> Retry Opportunity!
+          playRetrySound();
+
+          // Shake and Disable this wrong button
+          selectedBtn.className = `w-full text-left p-3.5 sm:p-4 rounded-2xl border-2 border-rose-300 bg-rose-50 text-rose-700 font-medium text-xs sm:text-sm animate-shake pointer-events-none opacity-60 flex items-center justify-between`;
+          selectedBtn.querySelector('.status-icon').innerHTML = '❌';
+          selectedBtn.querySelector('.status-icon').classList.remove('opacity-0');
+
+          // Show Alert Banner
+          retryAlertText.innerText = '💡 틀렸습니다! 다시 한번 생각해보세요 (남은 기회: 1회)';
+          retryAlertBanner.classList.remove('hidden');
+
+        } else {
+          // 2nd Attempt Wrong -> Finish Question
+          isQuestionFinished = true;
+          playFailSound();
+
+          // Style current wrong button
+          selectedBtn.className = `w-full text-left p-3.5 sm:p-4 rounded-2xl border-2 border-rose-400 bg-rose-100 text-rose-900 font-bold text-xs sm:text-sm flex items-center justify-between shadow-sm`;
+          selectedBtn.querySelector('.status-icon').innerHTML = '❌';
+          selectedBtn.querySelector('.status-icon').classList.remove('opacity-0');
+
+          // Highlight Correct Option
+          const allButtons = optionsContainer.querySelectorAll('button');
+          const correctBtn = allButtons[q.answer];
+          correctBtn.className = `w-full text-left p-3.5 sm:p-4 rounded-2xl border-2 border-emerald-400 bg-emerald-50 text-emerald-900 font-bold text-xs sm:text-sm flex items-center justify-between`;
+          correctBtn.querySelector('.status-icon').innerHTML = '💡';
+          correctBtn.querySelector('.status-icon').classList.remove('opacity-0');
+
+          disableAllOptions();
+          retryAlertBanner.classList.add('hidden');
+
+          // Show Explanation
+          scoreEarnedBadge.innerText = '0점 (기회 소진)';
+          scoreEarnedBadge.className = 'text-xs font-extrabold px-2.5 py-0.5 rounded-full bg-rose-100 text-rose-700';
+
+          explanationIcon.innerText = '아쉬워요!';
+          explanationTitle.innerText = `정답은 ${q.answer + 1}번입니다.`;
+          explanationTitle.className = 'font-bold text-sm sm:text-base text-rose-700';
+          explanationText.innerText = q.explanation;
+          explanationBox.className = 'p-4 rounded-2xl bg-rose-50 border border-rose-200 text-slate-800 space-y-2.5 animate-pop';
+          explanationBox.classList.remove('hidden');
+
+          // Record Log
+          userAnswers.push({
+            questionId: q.id,
+            category: q.category,
+            attemptsUsed: 2,
+            pointsEarned: 0,
+            isCorrect: false
+          });
+        }
+      }
+
+      // Update Next button label on last question
+      if (isQuestionFinished) {
+        if (currentQuestionIndex === quizData.length - 1) {
+          nextBtn.innerHTML = `<span>최종 결과 확인하기</span> <span>🏆</span>`;
+        } else {
+          nextBtn.innerHTML = `<span>다음 문제</span> <span>👉</span>`;
+        }
+      }
+    }
+
+    function disableAllOptions() {
+      const buttons = optionsContainer.querySelectorAll('button');
+      buttons.forEach(btn => btn.classList.add('pointer-events-none'));
+    }
+
+    function nextQuestion() {
+      if (currentQuestionIndex < quizData.length - 1) {
+        currentQuestionIndex++;
+        renderQuestion();
+      } else {
+        showResults();
+      }
+    }
+
+    function showResults() {
+      quizScreen.classList.add('hidden');
+      resultScreen.classList.remove('hidden');
+
+      playFinishFanfare();
+
+      resultScore.innerText = score;
+      resultScoreText.innerText = `${score}점 / 100점`;
+      resultPercentage.innerText = `${score}%`;
+
+      if (score === 100) {
+        resultBadgeText.innerText = '🏆 완벽해요! 상태 변화 마스터!';
+        resultMessage.innerText = '대단합니다! 물질의 상태 변화 핵심 개념을 100% 완벽하게 파악하셨군요!';
+        launchConfetti();
+      } else if (score >= 80) {
+        resultBadgeText.innerText = '🌟 훌륭합니다! 과학 인재!';
+        resultMessage.innerText = '우수한 성적입니다! 틀린 부분만 살짝 재확인하면 완벽해집니다.';
+        launchConfetti();
+      } else if (score >= 60) {
+        resultBadgeText.innerText = '👍 조금 더 노력해봐요!';
+        resultMessage.innerText = '개념을 전반적으로 이해하고 계시네요. 오답노트를 보고 복습해보세요!';
+      } else {
+        resultBadgeText.innerText = '📖 개념을 조금 더 복습해볼까요?';
+        resultMessage.innerText = '개념 정리 화면을 다시 천천히 읽어본 뒤 도전하면 더 높은 점수를 받을 수 있어요!';
+      }
+
+      // Review List
+      reviewList.innerHTML = '';
+      userAnswers.forEach((ans, idx) => {
+        const item = document.createElement('div');
+        item.className = `p-2.5 rounded-xl flex items-center justify-between border ${
+          ans.isCorrect ? 'bg-emerald-50/80 border-emerald-200 text-emerald-900' : 'bg-rose-50/80 border-rose-200 text-rose-900'
+        }`;
+        
+        let attemptTag = ans.isCorrect ? (ans.attemptsUsed === 1 ? '1차 성공' : '2차 성공') : '오답';
+        
+        item.innerHTML = `
+          <div class="flex items-center gap-2 truncate">
+            <span class="font-bold shrink-0">${ans.isCorrect ? '⭕' : '❌'} Q${idx + 1}</span>
+            <span class="truncate text-slate-700 font-medium">${ans.category}</span>
+          </div>
+          <div class="flex items-center gap-2 shrink-0">
+            <span class="text-[10px] px-2 py-0.5 rounded-md font-bold ${ans.isCorrect ? 'bg-emerald-100 text-emerald-800' : 'bg-rose-100 text-rose-800'}">${attemptTag}</span>
+            <span class="font-extrabold text-xs w-10 text-right">${ans.pointsEarned}점</span>
+          </div>
+        `;
+        reviewList.appendChild(item);
+      });
+    }
+
+    function resetQuiz() {
+      resultScreen.classList.add('hidden');
+      studyScreen.classList.add('hidden');
+      startScreen.classList.remove('hidden');
+      stopConfetti();
+    }
+
+    // --- 6. CONFETTI ANIMATION ---
+    let confettiAnimationId = null;
+
+    function launchConfetti() {
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+
+      const pieces = [];
+      const numberOfPieces = 80;
+      const colors = ['#38BDF8', '#F472B6', '#2DD4BF', '#FBBF24', '#A855F7'];
+
+      for (let i = 0; i < numberOfPieces; i++) {
+        pieces.push({
+          x: Math.random() * canvas.width,
+          y: Math.random() * canvas.height - canvas.height,
+          size: Math.random() * 8 + 4,
+          color: colors[Math.floor(Math.random() * colors.length)],
+          speed: Math.random() * 3 + 2,
+          rotation: Math.random() * 360,
+          rotationSpeed: Math.random() * 4 - 2
+        });
+      }
+
+      function update() {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        pieces.forEach(p => {
+          p.y += p.speed;
+          p.rotation += p.rotationSpeed;
+
+          if (p.y > canvas.height) {
+            p.y = -10;
+            p.x = Math.random() * canvas.width;
+          }
+
+          ctx.save();
+          ctx.translate(p.x, p.y);
+          ctx.rotate((p.rotation * Math.PI) / 180);
+          ctx.fillStyle = p.color;
+          ctx.fillRect(-p.size / 2, -p.size / 2, p.size, p.size);
+          ctx.restore();
+        });
+
+        confettiAnimationId = requestAnimationFrame(update);
+      }
+
+      stopConfetti();
+      update();
+      setTimeout(stopConfetti, 5000);
+    }
+
+    function stopConfetti() {
+      if (confettiAnimationId) {
+        cancelAnimationFrame(confettiAnimationId);
+        confettiAnimationId = null;
+      }
+      const canvas = document.getElementById('confetti-canvas');
+      const ctx = canvas.getContext('2d');
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+    }
+
+    window.addEventListener('resize', () => {
+      const canvas = document.getElementById('confetti-canvas');
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    });
+  </script>
+</body>
+</html>
